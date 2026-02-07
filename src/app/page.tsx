@@ -52,6 +52,10 @@ const LeaderboardPage: React.FC = () => {
               <th className="px-4 py-2 border-b border-zinc-700">Games Played</th>
               <th className="px-4 py-2 border-b border-zinc-700">Total Points</th>
               <th className="px-4 py-2 border-b border-zinc-700">Average Points</th>
+              <th className="px-4 py-2 border-b border-zinc-700">Total Profit</th>
+              <th className="px-4 py-2 border-b border-zinc-700">Win Rate</th>
+              <th className="px-4 py-2 border-b border-zinc-700">Highest Score</th>
+              <th className="px-4 py-2 border-b border-zinc-700">Most Chips Won</th>
               <th className="px-4 py-2 border-b border-zinc-700">Last Game</th>
             </tr>
           </thead>
@@ -63,7 +67,7 @@ const LeaderboardPage: React.FC = () => {
                 games.forEach(game => {
                   game.entries.forEach(entry => {
                     if (entry.playerId === player._id) {
-                      playerEntries.push(entry);
+                      playerEntries.push({ ...entry, gameDate: game.date });
                     }
                   });
                 });
@@ -75,12 +79,25 @@ const LeaderboardPage: React.FC = () => {
                   .filter(g => g.entries.some(e => e.playerId === player._id))
                   .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
                 const lastGame = lastGameObj ? new Date(lastGameObj.date).toLocaleDateString() : 'N/A';
+                // Total Profit (chips)
+                const totalProfit = playerEntries.reduce((sum, e) => sum + ((e.leftChips ?? 0) - (e.boughtChips ?? 0)), 0);
+                // Win Rate (games with positive points)
+                const gamesWon = playerEntries.filter(e => (e.points ?? 0) > 0).length;
+                const winRate = gamesPlayed ? ((gamesWon / gamesPlayed) * 100).toFixed(1) + '%' : '0%';
+                // Highest Single Game Score
+                const highestScore = playerEntries.length ? Math.max(...playerEntries.map(e => e.points ?? 0)) : 0;
+                // Most Chips Won in a Game
+                const mostChipsWon = playerEntries.length ? Math.max(...playerEntries.map(e => (e.leftChips ?? 0) - (e.boughtChips ?? 0))) : 0;
                 return {
                   ...player,
                   totalPoints,
                   gamesPlayed,
                   avgPoints,
                   lastGame,
+                  totalProfit,
+                  winRate,
+                  highestScore,
+                  mostChipsWon,
                 };
               })
               .sort((a, b) => b.totalPoints - a.totalPoints)
@@ -109,6 +126,10 @@ const LeaderboardPage: React.FC = () => {
                   <td className="px-4 py-2 border-b border-zinc-700 text-center">{player.gamesPlayed}</td>
                   <td className={"px-4 py-2 border-b border-zinc-700 text-center " + (player.totalPoints > 0 ? "text-green-500" : player.totalPoints < 0 ? "text-red-500" : "")}>{player.totalPoints}</td>
                   <td className={"px-4 py-2 border-b border-zinc-700 text-center " + (Number(player.avgPoints) > 0 ? "text-green-500" : Number(player.avgPoints) < 0 ? "text-red-500" : "")}>{player.avgPoints}</td>
+                  <td className={"px-4 py-2 border-b border-zinc-700 text-center " + (player.totalProfit > 0 ? "text-green-500" : player.totalProfit < 0 ? "text-red-500" : "")}>{player.totalProfit}</td>
+                  <td className="px-4 py-2 border-b border-zinc-700 text-center">{player.winRate}</td>
+                  <td className={"px-4 py-2 border-b border-zinc-700 text-center " + (player.highestScore > 0 ? "text-green-500" : player.highestScore < 0 ? "text-red-500" : "")}>{player.highestScore}</td>
+                  <td className={"px-4 py-2 border-b border-zinc-700 text-center " + (player.mostChipsWon > 0 ? "text-green-500" : player.mostChipsWon < 0 ? "text-red-500" : "")}>{player.mostChipsWon}</td>
                   <td className="px-4 py-2 border-b border-zinc-700 text-center">{player.lastGame}</td>
                 </tr>
               ))}
