@@ -17,6 +17,10 @@ export default function AdminDashboard() {
   if (!isAdmin) {
     return <div className="flex items-center justify-center min-h-screen text-red-600 font-bold">Unauthorized</div>;
   }
+  const handleLogout = async () => {
+    await fetch('/api/admin/logout', { method: 'POST' });
+    window.location.reload();
+  };
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
       <div className="w-full max-w-md p-6 bg-white rounded shadow">
@@ -27,7 +31,13 @@ export default function AdminDashboard() {
           <li className="mb-2"><span className="text-gray-500">Games management (coming soon)</span></li>
           <li className="mb-2"><span className="text-gray-500">Leaderboard management (coming soon)</span></li>
         </ul>
-        <p className="text-sm text-gray-400">More admin features will be added as development continues.</p>
+        <button
+          className="mt-6 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
+          onClick={handleLogout}
+        >
+          Logout
+        </button>
+        <p className="text-sm text-gray-400 mt-4">More admin features will be added as development continues.</p>
       </div>
     </div>
   );
