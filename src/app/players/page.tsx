@@ -15,6 +15,10 @@ type GameEntry = {
 };
 
 export default function PlayersPage() {
+    // Filters and sorting state
+    const [filterName, setFilterName] = useState<string>("");
+    const [sortField, setSortField] = useState<string>("name");
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>("asc");
   // All hooks at top level
   const [players, setPlayers] = useState<Player[]>([]);
   const [entries, setEntries] = useState<GameEntry[]>([]);
@@ -57,6 +61,36 @@ export default function PlayersPage() {
     const totalLeft = playerEntries.reduce((sum, e) => sum + e.leftChips, 0);
     return totalLeft - totalBought;
   };
+
+  // Filter and sort players
+  let filteredPlayers = players;
+  if (filterName) {
+    filteredPlayers = filteredPlayers.filter(p => p.name.toLowerCase().includes(filterName.toLowerCase()));
+  }
+  filteredPlayers = [...filteredPlayers].sort((a, b) => {
+    let aVal: any;
+    let bVal: any;
+    switch (sortField) {
+      case 'name':
+        aVal = a.name.toLowerCase();
+        bVal = b.name.toLowerCase();
+        break;
+      case 'totalPoints':
+        aVal = a.totalPoints ?? 0;
+        bVal = b.totalPoints ?? 0;
+        break;
+      case 'profit':
+        aVal = getProfit(a._id);
+        bVal = getProfit(b._id);
+        break;
+      default:
+        aVal = a.name.toLowerCase();
+        bVal = b.name.toLowerCase();
+    }
+    if (aVal < bVal) return sortOrder === 'asc' ? -1 : 1;
+    if (aVal > bVal) return sortOrder === 'asc' ? 1 : -1;
+    return 0;
+  });
   // Add player handler
   const handleAddPlayer = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -149,6 +183,16 @@ export default function PlayersPage() {
   return (
     <div className="container mx-auto py-8">
       <h1 className="text-3xl font-bold mb-6 text-center">Players</h1>
+      {/* Filter and sort controls */}
+      <div className="mb-6 flex flex-wrap gap-4 justify-center items-center">
+        <input
+          type="text"
+          value={filterName}
+          onChange={e => setFilterName(e.target.value)}
+          placeholder="Filter by name"
+          className="px-4 py-2 rounded border border-zinc-700 bg-zinc-900 text-white focus:outline-none focus:border-blue-500"
+        />
+      </div>
       {isAdmin && (
         <form className="mb-8 flex items-center gap-4 justify-center" onSubmit={handleAddPlayer}>
           <input
@@ -176,14 +220,50 @@ export default function PlayersPage() {
         <table className="min-w-full bg-black text-white border border-zinc-700 rounded shadow">
           <thead>
             <tr>
-              <th className="px-4 py-2 border-b border-zinc-700">Name</th>
-              <th className="px-4 py-2 border-b border-zinc-700">Total Points</th>
-              <th className="px-4 py-2 border-b border-zinc-700">Profit</th>
+              <th
+                className="px-4 py-2 border-b border-zinc-700 cursor-pointer hover:bg-zinc-800"
+                onClick={() => {
+                  if (sortField === 'name') {
+                    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+                  } else {
+                    setSortField('name');
+                    setSortOrder('asc');
+                  }
+                }}
+              >
+                Name {sortField === 'name' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
+              </th>
+              <th
+                className="px-4 py-2 border-b border-zinc-700 cursor-pointer hover:bg-zinc-800"
+                onClick={() => {
+                  if (sortField === 'totalPoints') {
+                    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+                  } else {
+                    setSortField('totalPoints');
+                    setSortOrder('desc');
+                  }
+                }}
+              >
+                Total Points {sortField === 'totalPoints' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
+              </th>
+              <th
+                className="px-4 py-2 border-b border-zinc-700 cursor-pointer hover:bg-zinc-800"
+                onClick={() => {
+                  if (sortField === 'profit') {
+                    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+                  } else {
+                    setSortField('profit');
+                    setSortOrder('desc');
+                  }
+                }}
+              >
+                Profit {sortField === 'profit' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
+              </th>
               {isAdmin && <th className="px-4 py-2 border-b border-zinc-700">Actions</th>}
             </tr>
           </thead>
           <tbody>
-            {players.map((player: Player, idx: number) => (
+            {filteredPlayers.map((player: Player, idx: number) => (
               <tr key={player._id} className={idx % 2 === 0 ? 'bg-zinc-900' : 'bg-black'}>
                 <td className="px-4 py-2 border-b border-zinc-700 font-semibold">
                   {editPlayerId === player._id ? (
