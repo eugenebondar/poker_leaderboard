@@ -68,8 +68,8 @@ export default function PlayersPage() {
     filteredPlayers = filteredPlayers.filter(p => p.name.toLowerCase().includes(filterName.toLowerCase()));
   }
   filteredPlayers = [...filteredPlayers].sort((a, b) => {
-    let aVal: any;
-    let bVal: any;
+    let aVal: unknown;
+    let bVal: unknown;
     switch (sortField) {
       case 'name':
         aVal = a.name.toLowerCase();
@@ -107,8 +107,7 @@ export default function PlayersPage() {
         body: JSON.stringify({ name: newPlayerName.trim() }),
       });
       if (!res.ok) {
-        const err = await res.json();
-        setAddError(err.error || 'Failed to add player.');
+        setAddError('Failed to add player.');
         return;
       }
       setAddSuccess("Player added successfully.");
@@ -117,7 +116,7 @@ export default function PlayersPage() {
       const playersRes = await fetch('/api/players');
       const playersData: Player[] = await playersRes.json();
       setPlayers(playersData);
-    } catch (err) {
+    } catch {
       setAddError("Failed to add player.");
     }
   };
@@ -141,8 +140,7 @@ export default function PlayersPage() {
         body: JSON.stringify({ name: editPlayerName.trim() }),
       });
       if (!res.ok) {
-        const err = await res.json();
-        setEditError(err.error || 'Failed to edit player.');
+        setEditError('Failed to edit player.');
         return;
       }
       setEditSuccess("Player updated successfully.");
@@ -152,7 +150,7 @@ export default function PlayersPage() {
       const playersRes = await fetch('/api/players');
       const playersData: Player[] = await playersRes.json();
       setPlayers(playersData);
-    } catch (err) {
+    } catch {
       setEditError("Failed to edit player.");
     }
   };
@@ -165,8 +163,7 @@ export default function PlayersPage() {
         method: 'DELETE',
       });
       if (!res.ok) {
-        const err = await res.json();
-        setDeleteError(err.error || 'Failed to delete player.');
+        setDeleteError('Failed to delete player.');
         return;
       }
       setDeleteSuccess("Player deleted successfully.");
@@ -175,7 +172,7 @@ export default function PlayersPage() {
       const playersRes = await fetch('/api/players');
       const playersData: Player[] = await playersRes.json();
       setPlayers(playersData);
-    } catch (err) {
+    } catch {
       setDeleteError("Failed to delete player.");
     }
   };

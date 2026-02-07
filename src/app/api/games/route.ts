@@ -12,11 +12,14 @@ export async function GET() {
   // Build a playerId -> name map
   const Player = (await import('@/models/Player')).default;
   const playerDocs = await Player.find().lean();
-  const playerMap = new Map(playerDocs.map((p: any) => [p._id.toString(), p.name]));
+  const playerMap = new Map(playerDocs.map((p: unknown) => [
+    (p as { _id: string; name: string })._id.toString(),
+    (p as { _id: string; name: string }).name
+  ]));
 
   // Attach entries to each game, including player name
   const gamesWithEntries = games.map(game => {
-    const gameId = (game._id as any)?.toString?.() ?? String(game._id);
+    const gameId = (game._id as unknown as { toString?: () => string }).toString?.() ?? String(game._id);
     return {
       _id: game._id,
       date: game.date,

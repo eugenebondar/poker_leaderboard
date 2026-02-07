@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import AdminNavStatus from "./components/AdminNavStatus";
+import Link from "next/link";
 
 import "./globals.css";
 
@@ -31,9 +32,9 @@ export default function RootLayout({
       >
         <nav className="w-full flex items-center justify-between px-8 py-4 bg-zinc-900 border-b border-zinc-700">
           <div className="flex gap-6 items-center">
-            <a href="/" className="text-xl font-bold text-white hover:text-blue-400">Leaderboard</a>
-            <a href="/players" className="text-lg text-white hover:text-blue-400">Players</a>
-            <a href="/games" className="text-lg text-white hover:text-blue-400">Games</a>
+            <Link href="/" className="text-xl font-bold text-white hover:text-blue-400">Leaderboard</Link>
+            <Link href="/players" className="text-lg text-white hover:text-blue-400">Players</Link>
+            <Link href="/games" className="text-lg text-white hover:text-blue-400">Games</Link>
           </div>
           <div>
             {/* Dynamic admin/login button */}

@@ -10,7 +10,11 @@ type Player = {
 type GameEntry = {
   playerId: string;
   points: number;
+  boughtChips: number;
+  leftChips: number;
 };
+
+type GameEntryWithDate = GameEntry & { gameDate: string };
 
 type Game = {
   _id: string;
@@ -63,7 +67,7 @@ const LeaderboardPage: React.FC = () => {
             {players
               .map(player => {
                 // Find all entries for this player
-                const playerEntries: GameEntry[] = [];
+                const playerEntries: GameEntryWithDate[] = [];
                 games.forEach(game => {
                   game.entries.forEach(entry => {
                     if (entry.playerId === player._id) {

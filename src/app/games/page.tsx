@@ -31,7 +31,7 @@ export default function GamesPage() {
   const [editGameDate, setEditGameDate] = useState<string>("");
   const [editBankCost, setEditBankCost] = useState<string>("50");
   const [editStatus, setEditStatus] = useState<'OPEN' | 'CLOSED'>("OPEN");
-  const [editEntries, setEditEntries] = useState<any[]>([]);
+  const [editEntries, setEditEntries] = useState<unknown[]>([]);
   const [editError, setEditError] = useState<string>("");
   const [editSuccess, setEditSuccess] = useState<string>("");
   const [deleteGameId, setDeleteGameId] = useState<string | null>(null);
@@ -91,7 +91,7 @@ export default function GamesPage() {
       const gamesRes = await fetch('/api/games');
       const gamesData: Game[] = gamesRes.ok ? await gamesRes.json() : [];
       setGames(gamesData);
-    } catch (err) {
+    } catch {
       setAddError("Failed to add game.");
     }
   };
@@ -102,8 +102,8 @@ export default function GamesPage() {
     filteredGames = filteredGames.filter(g => g.date && g.date.startsWith(filterDate));
   }
   filteredGames = [...filteredGames].sort((a, b) => {
-    let aVal: any;
-    let bVal: any;
+    let aVal: unknown;
+    let bVal: unknown;
     switch (sortField) {
       case 'date':
         aVal = new Date(a.date);
@@ -248,7 +248,7 @@ export default function GamesPage() {
                   </span>
                 </td>
                 <td className="px-4 py-2 border-b border-zinc-700 text-center">
-                  {game.entries.map((e, idx) => {
+                  {game.entries.map((e) => {
                     // Calculate money balance for each player
                     const chipsDiff = (typeof e.leftChips === 'number' ? e.leftChips : 0) - (typeof e.boughtChips === 'number' ? e.boughtChips : 0);
                     const bankCost = typeof game.bankCost === 'number' ? game.bankCost : 0;
@@ -350,7 +350,7 @@ export default function GamesPage() {
                   const gamesRes = await fetch('/api/games');
                   const gamesData: Game[] = gamesRes.ok ? await gamesRes.json() : [];
                   setGames(gamesData);
-                } catch (err) {
+                } catch {
                   setEditError("Failed to update game.");
                 }
               }}
@@ -485,7 +485,7 @@ export default function GamesPage() {
                     const gamesRes = await fetch('/api/games');
                     const gamesData: Game[] = gamesRes.ok ? await gamesRes.json() : [];
                     setGames(gamesData);
-                  } catch (err) {
+                  } catch {
                     setDeleteError("Failed to delete game.");
                   }
                 }}
