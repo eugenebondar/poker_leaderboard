@@ -14,6 +14,10 @@ type Player = {
 };
 
 export default function GamesPage() {
+  // Filters and sorting state
+  const [filterDate, setFilterDate] = useState<string>("");
+  const [sortField, setSortField] = useState<string>("date");
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>("desc");
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
@@ -90,9 +94,65 @@ export default function GamesPage() {
     }
   };
 
+  // Filter and sort games
+  let filteredGames = games;
+  if (filterDate) {
+    filteredGames = filteredGames.filter(g => g.date && g.date.startsWith(filterDate));
+  }
+  filteredGames = [...filteredGames].sort((a, b) => {
+    let aVal: any;
+    let bVal: any;
+    switch (sortField) {
+      case 'date':
+        aVal = new Date(a.date);
+        bVal = new Date(b.date);
+        break;
+      case 'bankCost':
+        aVal = a.bankCost ?? 0;
+        bVal = b.bankCost ?? 0;
+        break;
+      case 'entries':
+        aVal = a.entries.length;
+        bVal = b.entries.length;
+        break;
+      default:
+        aVal = a.date;
+        bVal = b.date;
+    }
+    if (aVal < bVal) return sortOrder === 'asc' ? -1 : 1;
+    if (aVal > bVal) return sortOrder === 'asc' ? 1 : -1;
+    return 0;
+  });
+
   return (
     <div className="container mx-auto py-8">
       <h1 className="text-3xl font-bold mb-6 text-center">Games</h1>
+      {/* Filter and sort controls */}
+      <div className="mb-6 flex flex-wrap gap-4 justify-center items-center">
+        <input
+          type="date"
+          value={filterDate}
+          onChange={e => setFilterDate(e.target.value)}
+          className="px-4 py-2 rounded border border-zinc-700 bg-zinc-900 text-white focus:outline-none focus:border-blue-500"
+        />
+        <select
+          value={sortField}
+          onChange={e => setSortField(e.target.value)}
+          className="px-4 py-2 rounded border border-zinc-700 bg-zinc-900 text-white"
+        >
+          <option value="date">Date</option>
+          <option value="bankCost">Bank Cost</option>
+          <option value="entries">Players</option>
+        </select>
+        <select
+          value={sortOrder}
+          onChange={e => setSortOrder(e.target.value as 'asc' | 'desc')}
+          className="px-4 py-2 rounded border border-zinc-700 bg-zinc-900 text-white"
+        >
+          <option value="asc">Ascending</option>
+          <option value="desc">Descending</option>
+        </select>
+      </div>
       {isAdmin && (
         <form className="mb-8 flex items-center gap-4 justify-center" onSubmit={handleAddGame}>
           <input
@@ -123,15 +183,51 @@ export default function GamesPage() {
         <table className="min-w-full bg-black text-white border border-zinc-700 rounded shadow">
           <thead>
             <tr>
-              <th className="px-4 py-2 border-b border-zinc-700">Date</th>
-              <th className="px-4 py-2 border-b border-zinc-700">Bank Cost (₴)</th>
-              <th className="px-4 py-2 border-b border-zinc-700">Players</th>
+              <th
+                className="px-4 py-2 border-b border-zinc-700 cursor-pointer hover:bg-zinc-800"
+                onClick={() => {
+                  if (sortField === 'date') {
+                    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+                  } else {
+                    setSortField('date');
+                    setSortOrder('desc');
+                  }
+                }}
+              >
+                Date {sortField === 'date' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
+              </th>
+              <th
+                className="px-4 py-2 border-b border-zinc-700 cursor-pointer hover:bg-zinc-800"
+                onClick={() => {
+                  if (sortField === 'bankCost') {
+                    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+                  } else {
+                    setSortField('bankCost');
+                    setSortOrder('desc');
+                  }
+                }}
+              >
+                Bank Cost (₴) {sortField === 'bankCost' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
+              </th>
+              <th
+                className="px-4 py-2 border-b border-zinc-700 cursor-pointer hover:bg-zinc-800"
+                onClick={() => {
+                  if (sortField === 'entries') {
+                    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+                  } else {
+                    setSortField('entries');
+                    setSortOrder('desc');
+                  }
+                }}
+              >
+                Players {sortField === 'entries' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
+              </th>
               <th className="px-4 py-2 border-b border-zinc-700">Entries</th>
               {isAdmin && <th className="px-4 py-2 border-b border-zinc-700">Actions</th>}
             </tr>
           </thead>
           <tbody>
-            {games.map((game: Game, idx: number) => (
+            {filteredGames.map((game: Game, idx: number) => (
               <tr key={game._id} className={idx % 2 === 0 ? 'bg-zinc-900' : 'bg-black'}>
                 <td className="px-4 py-2 border-b border-zinc-700 text-center">{new Date(game.date).toLocaleDateString()}</td>
                 <td className="px-4 py-2 border-b border-zinc-700 text-center">{game.bankCost ?? 0}</td>
