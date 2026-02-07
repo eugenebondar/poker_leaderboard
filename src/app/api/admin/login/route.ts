@@ -17,9 +17,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: `Invalid credentials ${password} ${ADMIN_PASSWORD_HASH} ${ADMIN_PASSWORD_HASH.length}` }, { status: 401 });
   }
 
-  // Set session cookie
-  // Note: Next.js API Route handlers don't have direct access to response objects for iron-session
-  // For App Router, use cookies API
-  // Here, we return a success response; session logic will be handled in pages/api or middleware
-  return NextResponse.json({ success: true, isAdmin: true });
+  // Set session cookie using Next.js cookies API
+  const response = NextResponse.json({ success: true, isAdmin: true });
+  response.cookies.set('admin_session', 'true', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    path: '/',
+    sameSite: 'strict',
+  });
+  return response;
 }
