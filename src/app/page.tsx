@@ -27,8 +27,8 @@ const LeaderboardPage: React.FC = () => {
     async function fetchData(): Promise<void> {
       const playersRes = await fetch('/api/players');
       const gamesRes = await fetch('/api/games');
-      const playersData: Player[] = await playersRes.json();
-      const gamesData: Game[] = await gamesRes.json();
+      const playersData: Player[] = playersRes.ok ? await playersRes.json() : [];
+      const gamesData: Game[] = gamesRes.ok ? await gamesRes.json() : [];
       setPlayers(playersData);
       setGames(gamesData);
       setLoading(false);
