@@ -10,11 +10,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Email and password required' }, { status: 400 });
   }
   if (email !== ADMIN_EMAIL) {
-    return NextResponse.json({ error: `Invalid credentials ${email} ${ADMIN_EMAIL}` }, { status: 401 });
+    return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
   }
   const valid = await bcrypt.compare(password, ADMIN_PASSWORD_HASH);
   if (!valid) {
-    return NextResponse.json({ error: `Invalid credentials ${password} ${ADMIN_PASSWORD_HASH} ${ADMIN_PASSWORD_HASH.length}` }, { status: 401 });
+    return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
   }
 
   // Set session cookie using Next.js cookies API

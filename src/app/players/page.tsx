@@ -68,8 +68,8 @@ export default function PlayersPage() {
     filteredPlayers = filteredPlayers.filter(p => p.name.toLowerCase().includes(filterName.toLowerCase()));
   }
   filteredPlayers = [...filteredPlayers].sort((a, b) => {
-    let aVal: unknown;
-    let bVal: unknown;
+    let aVal: number | string;
+    let bVal: number | string;
     switch (sortField) {
       case 'name':
         aVal = a.name.toLowerCase();

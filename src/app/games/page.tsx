@@ -31,7 +31,14 @@ export default function GamesPage() {
   const [editGameDate, setEditGameDate] = useState<string>("");
   const [editBankCost, setEditBankCost] = useState<string>("50");
   const [editStatus, setEditStatus] = useState<'OPEN' | 'CLOSED'>("OPEN");
-  const [editEntries, setEditEntries] = useState<unknown[]>([]);
+  type EditEntry = {
+    playerId: string;
+    name: string;
+    boughtChips: number | string;
+    leftChips: number | string;
+    inGame: boolean;
+  };
+  const [editEntries, setEditEntries] = useState<EditEntry[]>([]);
   const [editError, setEditError] = useState<string>("");
   const [editSuccess, setEditSuccess] = useState<string>("");
   const [deleteGameId, setDeleteGameId] = useState<string | null>(null);
@@ -102,8 +109,8 @@ export default function GamesPage() {
     filteredGames = filteredGames.filter(g => g.date && g.date.startsWith(filterDate));
   }
   filteredGames = [...filteredGames].sort((a, b) => {
-    let aVal: unknown;
-    let bVal: unknown;
+    let aVal: number | string | Date;
+    let bVal: number | string | Date;
     switch (sortField) {
       case 'date':
         aVal = new Date(a.date);

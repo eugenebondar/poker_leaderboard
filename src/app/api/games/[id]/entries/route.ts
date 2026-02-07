@@ -8,13 +8,15 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
   const entries = await request.json(); // Expecting array of { playerId, boughtChips, leftChips }
 
   // Bulk upsert entries for the game
-  const bulkOps = entries.map((entry: unknown) => ({
-    updateOne: {
-      filter: { gameId: params.id, playerId: entry.playerId },
-      update: { $set: { boughtChips: entry.boughtChips, leftChips: entry.leftChips, updatedAt: new Date() } },
-      upsert: true,
-    },
-  }));
+  const bulkOps = entries.map((entry: { playerId: string; boughtChips: number; leftChips: number }) => {
+    return {
+      updateOne: {
+        filter: { gameId: params.id, playerId: entry.playerId },
+        update: { $set: { boughtChips: entry.boughtChips, leftChips: entry.leftChips, updatedAt: new Date() } },
+        upsert: true,
+      },
+    };
+  });
 
   await GameEntry.bulkWrite(bulkOps);
   return NextResponse.json({ success: true });
