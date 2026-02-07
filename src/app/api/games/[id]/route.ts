@@ -10,3 +10,22 @@ export async function GET(request: Request, { params }: { params: { id: string }
   }
   return NextResponse.json(game);
 }
+
+export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+  await connectToDatabase();
+  const data = await request.json();
+  const game = await Game.findByIdAndUpdate(params.id, data, { new: true }).lean();
+  if (!game) {
+    return NextResponse.json({ error: 'Game not found' }, { status: 404 });
+  }
+  return NextResponse.json(game);
+}
+
+export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+  await connectToDatabase();
+  const game = await Game.findByIdAndDelete(params.id).lean();
+  if (!game) {
+    return NextResponse.json({ error: 'Game not found' }, { status: 404 });
+  }
+  return NextResponse.json({ success: true });
+}
