@@ -57,23 +57,61 @@ const LeaderboardPage: React.FC = () => {
           </thead>
           <tbody>
             {players
+              .map(player => {
+                // Find all entries for this player
+                const playerEntries: GameEntry[] = [];
+                games.forEach(game => {
+                  game.entries.forEach(entry => {
+                    if (entry.playerId === player._id) {
+                      playerEntries.push(entry);
+                    }
+                  });
+                });
+                const totalPoints = playerEntries.reduce((sum, e) => sum + (e.points ?? 0), 0);
+                const gamesPlayed = playerEntries.length;
+                const avgPoints = gamesPlayed ? (totalPoints / gamesPlayed).toFixed(2) : '0.00';
+                // Find last game
+                const lastGameObj = games
+                  .filter(g => g.entries.some(e => e.playerId === player._id))
+                  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+                const lastGame = lastGameObj ? new Date(lastGameObj.date).toLocaleDateString() : 'N/A';
+                return {
+                  ...player,
+                  totalPoints,
+                  gamesPlayed,
+                  avgPoints,
+                  lastGame,
+                };
+              })
               .sort((a, b) => b.totalPoints - a.totalPoints)
-              .map((player: Player, idx: number) => {
-                const playerGames = games.filter((g: Game) => g.entries.some((e: GameEntry) => e.playerId === player._id));
-                const totalPoints = player.totalPoints || 0;
-                const avgPoints = playerGames.length ? (totalPoints / playerGames.length).toFixed(2) : '0.00';
-                const lastGame = playerGames.length ? new Date(playerGames[playerGames.length - 1].date).toLocaleDateString() : 'N/A';
-                return (
-                  <tr key={player._id} className={idx % 2 === 0 ? 'bg-zinc-900' : 'bg-black'}>
-                    <td className="px-4 py-2 border-b border-zinc-700 text-center">{idx + 1}</td>
-                    <td className="px-4 py-2 border-b border-zinc-700 font-semibold">{player.name}</td>
-                    <td className="px-4 py-2 border-b border-zinc-700 text-center">{playerGames.length}</td>
-                    <td className="px-4 py-2 border-b border-zinc-700 text-center">{totalPoints}</td>
-                    <td className="px-4 py-2 border-b border-zinc-700 text-center">{avgPoints}</td>
-                    <td className="px-4 py-2 border-b border-zinc-700 text-center">{lastGame}</td>
-                  </tr>
-                );
-              })}
+              .map((player, idx) => (
+                <tr
+                  key={player._id}
+                  className={
+                    idx === 0
+                      ? 'bg-gradient-to-r from-yellow-300 via-yellow-200 to-yellow-100 text-yellow-900 font-bold'
+                      : idx === 1
+                      ? 'bg-gradient-to-r from-gray-300 via-gray-200 to-gray-100 text-gray-900 font-bold'
+                      : idx === 2
+                      ? 'bg-gradient-to-r from-orange-300 via-orange-200 to-orange-100 text-orange-900 font-bold'
+                      : idx % 2 === 0
+                      ? 'bg-zinc-900'
+                      : 'bg-black'
+                  }
+                >
+                  <td className="px-4 py-2 border-b border-zinc-700 text-center">
+                    {idx + 1}
+                    {idx === 0 && <span title="Gold" className="ml-2 text-yellow-400 text-xl">🏆</span>}
+                    {idx === 1 && <span title="Silver" className="ml-2 text-gray-300 text-xl">🥈</span>}
+                    {idx === 2 && <span title="Bronze" className="ml-2 text-orange-400 text-xl">🥉</span>}
+                  </td>
+                  <td className="px-4 py-2 border-b border-zinc-700 font-semibold">{player.name}</td>
+                  <td className="px-4 py-2 border-b border-zinc-700 text-center">{player.gamesPlayed}</td>
+                  <td className={"px-4 py-2 border-b border-zinc-700 text-center " + (player.totalPoints > 0 ? "text-green-500" : player.totalPoints < 0 ? "text-red-500" : "")}>{player.totalPoints}</td>
+                  <td className={"px-4 py-2 border-b border-zinc-700 text-center " + (Number(player.avgPoints) > 0 ? "text-green-500" : Number(player.avgPoints) < 0 ? "text-red-500" : "")}>{player.avgPoints}</td>
+                  <td className="px-4 py-2 border-b border-zinc-700 text-center">{player.lastGame}</td>
+                </tr>
+              ))}
           </tbody>
         </table>
       </div>
