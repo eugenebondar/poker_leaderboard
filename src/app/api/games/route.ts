@@ -1,11 +1,16 @@
 import { NextResponse } from 'next/server';
-
-// Mocked games data
-const games = [
-  { id: '1', title: 'Friday Night #1', date: '2026-02-01', status: 'CLOSED' },
-  { id: '2', title: 'Friday Night #2', date: '2026-02-07', status: 'OPEN' },
-];
+import { connectToDatabase } from '@/lib/db';
+import Game from '@/models/Game';
 
 export async function GET() {
+  await connectToDatabase();
+  const games = await Game.find().lean();
   return NextResponse.json(games);
+}
+
+export async function POST(request: Request) {
+  await connectToDatabase();
+  const data = await request.json();
+  const game = await Game.create(data);
+  return NextResponse.json(game, { status: 201 });
 }
