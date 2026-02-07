@@ -5,6 +5,7 @@ type Game = {
   _id: string;
   date: string;
   bankCost?: number;
+  status?: 'OPEN' | 'CLOSED';
   entries: { playerId: string; playerName: string; points: number; boughtChips?: number; leftChips?: number }[];
 };
 
@@ -29,6 +30,7 @@ export default function GamesPage() {
   const [editGameId, setEditGameId] = useState<string | null>(null);
   const [editGameDate, setEditGameDate] = useState<string>("");
   const [editBankCost, setEditBankCost] = useState<string>("50");
+  const [editStatus, setEditStatus] = useState<'OPEN' | 'CLOSED'>("OPEN");
   const [editEntries, setEditEntries] = useState<any[]>([]);
   const [editError, setEditError] = useState<string>("");
   const [editSuccess, setEditSuccess] = useState<string>("");
@@ -222,6 +224,7 @@ export default function GamesPage() {
               >
                 Players {sortField === 'entries' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}
               </th>
+              <th className="px-4 py-2 border-b border-zinc-700">Status</th>
               <th className="px-4 py-2 border-b border-zinc-700">Entries</th>
               {isAdmin && <th className="px-4 py-2 border-b border-zinc-700">Actions</th>}
             </tr>
@@ -232,6 +235,18 @@ export default function GamesPage() {
                 <td className="px-4 py-2 border-b border-zinc-700 text-center">{new Date(game.date).toLocaleDateString()}</td>
                 <td className="px-4 py-2 border-b border-zinc-700 text-center">{game.bankCost ?? 0}</td>
                 <td className="px-4 py-2 border-b border-zinc-700 text-center">{game.entries.length}</td>
+                <td className="px-4 py-2 border-b border-zinc-700 text-center">
+                  <span
+                    className={
+                      "inline-block px-3 py-1 rounded-full text-xs font-semibold " +
+                      (game.status === 'CLOSED'
+                        ? 'bg-green-700 text-white border border-green-900'
+                        : 'bg-gray-600 text-white border border-gray-800')
+                    }
+                  >
+                    {game.status ?? 'OPEN'}
+                  </span>
+                </td>
                 <td className="px-4 py-2 border-b border-zinc-700 text-center">
                   {game.entries.map((e, idx) => {
                     // Calculate money balance for each player
@@ -258,6 +273,7 @@ export default function GamesPage() {
                         setEditGameId(game._id);
                         setEditGameDate(game.date.split('T')[0]);
                         setEditBankCost(game.bankCost?.toString() ?? "");
+                        setEditStatus(game.status ?? 'OPEN');
                         setEditError("");
                         setEditSuccess("");
                         // Prepare entries for editing
@@ -301,11 +317,11 @@ export default function GamesPage() {
                 setEditError("");
                 setEditSuccess("");
                 try {
-                  // Update game date and bankCost
+                  // Update game date, bankCost, and status
                   const res = await fetch(`/api/games/${editGameId}`, {
                     method: "PATCH",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ date: new Date(editGameDate).toISOString(), bankCost: Number(editBankCost) || 0 }),
+                    body: JSON.stringify({ date: new Date(editGameDate).toISOString(), bankCost: Number(editBankCost) || 0, status: editStatus }),
                   });
                   if (!res.ok) {
                     const err = await res.json();
@@ -354,6 +370,14 @@ export default function GamesPage() {
                   onChange={e => setEditBankCost(e.target.value)}
                   className="w-40 px-4 py-2 rounded border border-zinc-700 bg-zinc-900 text-white"
                 />
+                <select
+                  value={editStatus}
+                  onChange={e => setEditStatus(e.target.value as 'OPEN' | 'CLOSED')}
+                  className="w-40 px-4 py-2 rounded border border-zinc-700 bg-zinc-900 text-white"
+                >
+                  <option value="OPEN">OPEN</option>
+                  <option value="CLOSED">CLOSED</option>
+                </select>
               </div>
               <div className="overflow-x-auto mb-4">
                 <table className="min-w-full bg-zinc-800 text-white border border-zinc-700 rounded">
