@@ -349,7 +349,6 @@ export default function GamesPage() {
                 <input
                   type="number"
                   min="0"
-                  defaultValue={50}
                   placeholder="Bank Cost (₴)"
                   value={editBankCost}
                   onChange={e => setEditBankCost(e.target.value)}
